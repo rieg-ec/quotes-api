@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const helmet = require('helmet');
 // const cors = require('cors');
@@ -12,6 +14,7 @@ app.use(morgan('common'));
 app.use(compression());
 app.use(helmet());
 
+app.get('/', (req, res) => res.send('Quotes Api'));
 app.use('/api', api);
 
 module.exports = app;

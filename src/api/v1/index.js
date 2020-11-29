@@ -1,8 +1,8 @@
 const { Router } = require('express');
-const quotesRoute = require('./quotes.route.js');
+const quotesRoute = require('./quotes.js');
 
 const router = Router();
 
-router.use('/quotes', quotesRoute);
+router.use('/', quotesRoute);
 
 module.exports = router;

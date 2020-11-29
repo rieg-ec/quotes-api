@@ -1,28 +1,58 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { quotes } = require('');
+const db = require('../db');
+
 
 class QuoteService {
   static async getAllQuotes() {
-    const quotesPath = path.join(__dirname, '..', '..', 'quotes', 'quotes.json');
-    const file = await fs.readFile(quotesPath);
-    return JSON.parse(file);
+    // TODO: return quotes and their authors
+    const quotes = await db.select('body').from('quotes').limit(10);
+    return quotes;
   }
 
-  static async getQuotesByAuthor(_author) {
-    const quotes = await this.getAllQuotes();
-    return quotes.filter(({ author }) => author === _author);
+  static async getQuotesByAuthorId(id) {
+    const author_promise = db
+      .select('author_name as author')
+      .from('authors')
+      .where({ author_id: id })
+      .first();
+    const quotes_promise = db.select('body')
+      .from('quotes')
+      .join('authors', 'author_id', 'fk__authors__author_id')
+      .where({ author_id: id });
+
+    const [{ author }, quotes] = await Promise.all([author_promise, quotes_promise]);
+
+    return { author, quotes };
   }
 
   static async getRandomQuote() {
-    const quotes = await this.getAllQuotes();
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    return quotes[randomIndex];
+    const { rows } = await db.raw(`
+    SELECT author_name AS author, body
+    FROM quotes, authors
+    WHERE author_id = fk__authors__author_id
+      AND quote_id = (SELECT CASE WHEN quote_id = 0 THEN 1 ELSE quote_id END
+                      FROM (SELECT ROUND(RANDOM() * (SELECT MAX(quote_id) FROM quotes))
+                      AS quote_id) AS r);
+    `);
+
+    const [{ author, body }] = rows;
+
+    return { author, body };
   }
 
-  static async getQuoteById(id) {
-    // TODO:
-    return id;
+  static async getAuthors() {
+    const authors = await db.select('author_name as author').from('authors');
+    return authors.map(item => item.author);
+  }
+
+  static async getAuthorById(id) {
+    const response = await db
+      .select('author_name as author', 'body')
+      .from('quotes')
+      .join('authors', 'author_id', 'fk__authors__author_id')
+      .where({ 'author_id': id });
+
+    console.log(response);
+    return
   }
 }
 
