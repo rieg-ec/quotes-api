@@ -2,22 +2,28 @@ const db = require('../db');
 
 
 class QuoteService {
-  static async getAllQuotes() {
-    // TODO: return quotes and their authors
-    const quotes = await db.select('body').from('quotes').limit(10);
-    return quotes;
+
+  static async getQuoteById(id) {
+    const { author, body } = await db
+      .select('author_name as author', 'body')
+      .from('quotes')
+      .join('authors', 'author_id', 'fk__authors__author_id')
+      .where({ 'quote_id': id })
+      .first();
+
+    return { author, body };
   }
 
   static async getQuotesByAuthorId(id) {
     const author_promise = db
       .select('author_name as author')
       .from('authors')
-      .where({ author_id: id })
+      .where({ 'author_id': id })
       .first();
     const quotes_promise = db.select('body')
       .from('quotes')
       .join('authors', 'author_id', 'fk__authors__author_id')
-      .where({ author_id: id });
+      .where({ 'author_id': id });
 
     const [{ author }, quotes] = await Promise.all([author_promise, quotes_promise]);
 
@@ -42,17 +48,6 @@ class QuoteService {
   static async getAuthors() {
     const authors = await db.select('author_name as author').from('authors');
     return authors.map(item => item.author);
-  }
-
-  static async getAuthorById(id) {
-    const response = await db
-      .select('author_name as author', 'body')
-      .from('quotes')
-      .join('authors', 'author_id', 'fk__authors__author_id')
-      .where({ 'author_id': id });
-
-    console.log(response);
-    return
   }
 }
 
