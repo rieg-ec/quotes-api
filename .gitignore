@@ -1,0 +1,7 @@
+test.js
+.env
+node_modules
+project.md
+.DS_Store
+data/
+quotes/
