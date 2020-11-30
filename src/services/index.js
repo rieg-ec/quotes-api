@@ -1,4 +1,4 @@
-const QuoteService = require('./quoteService.js');
+const QuoteService = require('./quotes.service.js');
 
 module.exports = {
   QuoteService,
