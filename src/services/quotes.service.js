@@ -43,13 +43,16 @@ const getRandomQuote = async () => {
   return { author, body };
 };
 
+const getQuoteByTextSearch = async (word) => {
+  const quotes = await db
+    .select('author_name as author', 'body')
+    .from('quotes')
+    .join('authors', 'author_id', 'fk__authors__author_id')
+    .where(db.raw('quotes.body_ts_vector @@ to_tsquery(? || \':*\')', word));
 
-const getAuthors = async () => {
-  const authors = await db.select('author_name as author').from('authors');
-  return authors.map(item => item.author);
-}
-
+  return quotes;
+};
 
 module.exports = {
-  getQuoteById, getQuotesByAuthorId, getRandomQuote, getAuthors,
+  getQuoteById, getQuotesByAuthorId, getRandomQuote, getQuoteByTextSearch,
 };

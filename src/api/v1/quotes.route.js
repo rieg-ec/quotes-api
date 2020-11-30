@@ -1,16 +1,13 @@
 const { Router } = require('express');
-const { QuoteService } = require('../../services');
+const { QuoteService, AuthorService } = require('../../services');
 const { quoteSearchSchema } = require('../../schemas');
 const router = Router();
 
-router.post('/quotes', async (req, res) => {
-  try {
-    const { author, quote } = req.body;
-    const value = await quoteSearchSchema.validateAsync({ author, quote });
-    console.log(value);
-  } catch (err) {
-    console.error(err);
-  }
+router.get('/quotes-search', async (req, res) => {
+  const { value, error} = quoteSearchSchema.validate(req.query);
+  if (error) throw error;
+  const quotes = await QuoteService.getQuoteByTextSearch(value.word);
+  res.json({ success: true, payload: { quotes } });
 });
 
 router.get('/quotes/:id', async (req, res) => {
@@ -24,8 +21,14 @@ router.get('/random-quote', async (req, res) => {
 });
 
 router.get('/authors', async (req, res) => {
-  const authors = await QuoteService.getAuthors();
-  return res.json({ success: true, payload: { authors } });
+  if (req.query.name) {
+    const authors = await AuthorService.getAuthorByName(req.query.name);
+    res.json({ success: true, payload: { authors } });
+
+  } else {
+    const authors = await AuthorService.getAuthors();
+    return res.json({ success: true, payload: { authors } });
+  }
 });
 
 router.get('/authors/:id', async (req, res) => {
