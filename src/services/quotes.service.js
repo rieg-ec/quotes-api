@@ -1,54 +1,57 @@
 const db = require('../db');
 
 const getQuoteById = async (id) => {
-  const { author, body } = await db
-    .select('author_name as author', 'body')
+  const quote = await db
+    .select('author_name as name', 'author_id', 'body', 'quote_id')
     .from('quotes')
     .join('authors', 'author_id', 'fk__authors__author_id')
     .where({ 'quote_id': id })
     .first();
 
-  return { author, body };
+  return quote;
 };
 
 const getQuotesByAuthorId = async (id) => {
-  const author_promise = db
-    .select('author_name as author')
+  const authorPromise = db
+    .select('author_name as name')
     .from('authors')
     .where({ 'author_id': id })
     .first();
 
-  const quotes_promise = db.select('body')
+  const quotesPromise = db.select('body')
     .from('quotes')
     .join('authors', 'author_id', 'fk__authors__author_id')
     .where({ 'author_id': id });
 
-  const [{ author }, quotes] = await Promise.all([author_promise, quotes_promise]);
-
-  return { author, quotes };
+  const [{ name }, quotes] = await Promise.all([authorPromise, quotesPromise]);
+  return { name, quotes };
 };
 
 const getRandomQuote = async () => {
   const { rows } = await db.raw(`
-  SELECT author_name AS author, body
-  FROM quotes, authors
-  WHERE author_id = fk__authors__author_id
-    AND quote_id = (SELECT CASE WHEN quote_id = 0 THEN 1 ELSE quote_id END
-                    FROM (SELECT ROUND(RANDOM() * (SELECT MAX(quote_id) FROM quotes))
-                    AS quote_id) AS r);
+    SELECT author_name as name, author_id, body, quote_id
+    FROM quotes, authors
+    WHERE author_id = fk__authors__author_id
+    AND random() < 0.01
+    LIMIT 1;
   `);
 
-  const [{ author, body }] = rows;
+  const [quote] = rows;
 
-  return { author, body };
+  return quote;
 };
 
-const getQuoteByTextSearch = async (word) => {
-  const quotes = await db
-    .select('author_name as author', 'body')
+const getQuoteByTextSearch = async ({ name, word }) => {
+  const query = db
+    .select('author_name as name', 'author_id', 'body', 'quote_id')
     .from('quotes')
-    .join('authors', 'author_id', 'fk__authors__author_id')
-    .where(db.raw('quotes.body_ts_vector @@ to_tsquery(? || \':*\')', word));
+    .join('authors', 'author_id', 'fk__authors__author_id');
+
+  if (name) query.where('author_name', 'ilike', `%${name}%`);
+  if (word) query.where(db
+    .raw('quotes.body_ts_vector @@ to_tsquery(? || \':*\')', word));
+
+  const quotes = await query;
 
   return quotes;
 };

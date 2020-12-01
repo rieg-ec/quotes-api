@@ -7,8 +7,9 @@
     "seed": "./node_modules/.bin/knex seed:run --knexfile=src/db/knexfile.js",
     "migrate": "./node_modules/.bin/knex migrate:latest --knexfile=src/db/knexfile.js",
     "rollback": "./node_modules/.bin/knex migrate:rollback",
-    "dev": "nodemon src/index.js --exec 'npm run lint && node'",
-    "lint": "./node_modules/.bin/eslint"
+    "dev": "nodemon src/index.js",
+    "lint": "./node_modules/.bin/eslint .",
+    "test": "npx mocha tests/*/*.test.js"
   },
   "dependencies": {
     "axios": "^0.21.0",
@@ -23,7 +24,12 @@
     "pg": "^8.5.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
     "eslint": "^7.14.0",
-    "nodemon": "^2.0.6"
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "mocha": "^8.2.1",
+    "nodemon": "^2.0.6",
+    "supertest": "^6.0.1"
   }
 }

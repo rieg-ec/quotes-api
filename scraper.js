@@ -2,7 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs').promises;
 
-const getUrlsByAuthor = async () =>  {
+const getUrlsByAuthor = async () => {
   const url = 'https://www.brainyquote.com/authors';
   const response = await axios.get(url);
   const html = response.data;
@@ -58,11 +58,9 @@ const fetchQuotes = async () => {
     console.log('fetched quotes');
   });
 
-  authorsByUrl = authorsByUrl.filter(({ author }) => {
-    return !quotesByAuthor
-      .map((item) => item.author)
-      .includes(author);
-  });
+  authorsByUrl = authorsByUrl.filter(({ author }) => !quotesByAuthor
+    .map((item) => item.author)
+    .includes(author));
 
   fs.writeFile('quotes/authors.json',
       JSON.stringify(authorsByUrl),
@@ -74,6 +72,6 @@ const fetchQuotes = async () => {
 
 (async () => {
   const arg = process.argv.splice(2, 1)[0];
-  if (arg === 'quotes') await fetchQuotes()
+  if (arg === 'quotes') await fetchQuotes();
   else if (arg === 'authors') await fetchAuthors();
 })();
