@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
+    "start": "node src/index.js",
     "seed": "./node_modules/.bin/knex seed:run --knexfile=src/db/knexfile.js",
     "migrate": "./node_modules/.bin/knex migrate:latest --knexfile=src/db/knexfile.js",
     "rollback": "./node_modules/.bin/knex migrate:rollback",
