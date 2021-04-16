@@ -1,4 +1,4 @@
-const { request, expect, app } = require("../setup");
+const { request, expect, app } = require('../setup');
 
 /*
   routes:
@@ -9,56 +9,55 @@ const { request, expect, app } = require("../setup");
 
 const PATH = '/api/v1/quotes';
 
-describe('GET /quotes', function() {
+describe('GET /quotes', () => {
   let quoteId;
   let authorName;
   let quoteBody;
 
-  describe('GET /random', function() {
-    it('responds with json', function(done) {
+  describe('GET /random', () => {
+    it('responds with json', (done) => {
       request(app)
         .get(`${PATH}/random`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
-        .end(function(err, res) {
+        .end((err, res) => {
           if (err) return done(err);
           const { quote } = JSON.parse(res.text).payload;
-          quoteId = quote['quote_id'];
-          authorName = quote['name'];
-          quoteBody = quote['body'];
+          quoteId = quote.quote_id;
+          authorName = quote.name;
+          quoteBody = quote.body;
           done();
         });
     });
-  })
+  });
 
-
-  describe('GET /search', function() {
-    it('responds with json', function(done) {
+  describe('GET /search', () => {
+    it('responds with json', (done) => {
       request(app)
         .get(`${PATH}/search?name=${authorName}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
-        .end(function(err, res) {
+        .end((err, res) => {
           if (err) return done(err);
           const { quotes } = JSON.parse(res.text).payload;
           expect(quotes).to.be.an('array');
-          const bodies = quotes.map(quote => quote.body);
+          const bodies = quotes.map((quote) => quote.body);
           expect(bodies).to.include(quoteBody);
           done();
         });
     });
   });
 
-  describe('GET /:id', function() {
-    it('responds with json', function(done) {
+  describe('GET /:id', () => {
+    it('responds with json', (done) => {
       request(app)
         .get(`${PATH}/${quoteId}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200)
-        .end(function(err, res) {
+        .end((err, res) => {
           if (err) return done(err);
           const { quote } = JSON.parse(res.text).payload;
           expect(quote.name).to.equal(authorName);
@@ -67,6 +66,5 @@ describe('GET /quotes', function() {
           done();
         });
     });
-  })
-
+  });
 });
